@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eternova — Your Digital Legacy</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <style>
   :root {
@@ -1549,9 +1550,15 @@
      JAVASCRIPT
 ════════════════════════════════ -->
 <script>
+// ── SUPABASE SETUP ──
+const { createClient } = supabase;
+const sb = createClient(
+  'https://csebfnjufnkaohyqdphs.supabase.co',
+  'sb_publishable_xwagNJu7gbJLq_4i9Qu6Fg_tCO7Zef5'
+);
+
 // ── STATE ──
 let currentUser = null;
-let users = JSON.parse(localStorage.getItem('etv_users') || '{}');
 let selectedDelivery = 'upon-passing';
 
 // ── ENCRYPTION ──
@@ -1563,17 +1570,6 @@ function decrypt(ciphertext, key) {
     const bytes = CryptoJS.AES.decrypt(ciphertext, key);
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch { return '[encrypted]'; }
-}
-
-function getUserData() {
-  if (!currentUser) return null;
-  return JSON.parse(localStorage.getItem('etv_data_' + currentUser.email) || JSON.stringify({
-    messages: [], contacts: [], vault: [], lastAlive: Date.now(), aliveCheckDue: Date.now() + 7*24*60*60*1000
-  }));
-}
-function saveUserData(data) {
-  if (!currentUser) return;
-  localStorage.setItem('etv_data_' + currentUser.email, JSON.stringify(data));
 }
 
 // ── NAVIGATION ──
@@ -1591,23 +1587,19 @@ function switchTab(tab) {
   document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
 }
 
-function doLogin() {
+async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
   if (!email || !pass) { showToast('Please fill in all fields.'); return; }
-  const stored = users[email];
-  if (stored && stored.passHash !== CryptoJS.MD5(pass).toString()) {
-    showToast('Incorrect password.'); return;
-  }
-  if (!stored) {
-    users[email] = { name: email.split('@')[0], passHash: CryptoJS.MD5(pass).toString() };
-    localStorage.setItem('etv_users', JSON.stringify(users));
-  }
-  currentUser = { email, name: users[email].name, pass };
+  showToast('Signing in...');
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { showToast('Error: ' + error.message); return; }
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
+  currentUser = { id: data.user.id, email, name: profile?.name || email.split('@')[0], pass };
   enterDashboard();
 }
 
-function doRegister() {
+async function doRegister() {
   const name = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim();
   const pass = document.getElementById('reg-pass').value;
@@ -1615,13 +1607,38 @@ function doRegister() {
   if (!name || !email || !pass) { showToast('Please fill in all fields.'); return; }
   if (pass !== pass2) { showToast('Passwords do not match.'); return; }
   if (pass.length < 8) { showToast('Password must be at least 8 characters.'); return; }
-  if (users[email]) { showToast('Account already exists. Please sign in.'); switchTab('login'); return; }
-  users[email] = { name, passHash: CryptoJS.MD5(pass).toString() };
-  localStorage.setItem('etv_users', JSON.stringify(users));
-  currentUser = { email, name, pass };
-  showToast('Welcome to Eternova, ' + name + '!');
+  showToast('Creating your account...');
+  const { data, error } = await sb.auth.signUp({
+    email, password: pass,
+    options: { data: { name } }
+  });
+  if (error) { showToast('Error: ' + error.message); return; }
+  currentUser = { id: data.user.id, email, name, pass };
+  showToast('Welcome to Eternova, ' + name + '! ✓');
   enterDashboard();
 }
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null;
+  showScreen('landing');
+  showToast('Signed out successfully.');
+}
+
+// ── AUTO LOGIN ON PAGE LOAD ──
+window.addEventListener('load', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+    currentUser = {
+      id: session.user.id,
+      email: session.user.email,
+      name: profile?.name || session.user.email.split('@')[0],
+      pass: session.access_token
+    };
+    enterDashboard();
+  }
+});
 
 function enterDashboard() {
   document.getElementById('user-display').textContent = currentUser.name.split(' ')[0];
@@ -1629,14 +1646,7 @@ function enterDashboard() {
   document.getElementById('first-name').textContent = currentUser.name.split(' ')[0];
   showScreen('dashboard');
   showDashPage('overview');
-  updateStats();
   checkAliveStatus();
-}
-
-function doLogout() {
-  currentUser = null;
-  showScreen('landing');
-  showToast('Signed out successfully.');
 }
 
 // ── DASHBOARD ──
@@ -1654,28 +1664,29 @@ function showDashPage(page) {
   updateStats();
 }
 
-function updateStats() {
-  const data = getUserData();
-  if (!data) return;
-  document.getElementById('stat-messages').textContent = data.messages.length;
-  document.getElementById('stat-contacts').textContent = data.contacts.length;
-  document.getElementById('stat-vault').textContent = data.vault.length;
-  const score = Math.min(100, Math.round((
-    (data.messages.length > 0 ? 30 : 0) +
-    (data.contacts.length > 0 ? 40 : 0) +
-    (data.vault.length > 0 ? 20 : 0) + 10
-  )));
+async function updateStats() {
+  if (!currentUser) return;
+  const [{ count: msgCount }, { count: conCount }, { count: vaultCount }] = await Promise.all([
+    sb.from('messages').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id),
+    sb.from('contacts').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id),
+    sb.from('vault').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id),
+  ]);
+  document.getElementById('stat-messages').textContent = msgCount || 0;
+  document.getElementById('stat-contacts').textContent = conCount || 0;
+  document.getElementById('stat-vault').textContent = vaultCount || 0;
+  const score = Math.min(100, ((msgCount>0?30:0) + (conCount>0?40:0) + (vaultCount>0?20:0) + 10));
   document.getElementById('stat-score').textContent = score + '%';
   document.getElementById('legacy-bar').style.width = score + '%';
 }
 
 // ── ALIVE CHECK ──
-function checkAliveStatus() {
-  const data = getUserData();
-  if (!data) return;
-  const due = data.aliveCheckDue || Date.now();
-  if (Date.now() > due) {
-    const banner = `
+async function checkAliveStatus() {
+  if (!currentUser) return;
+  const { data: profile } = await sb.from('profiles').select('alive_check_due').eq('id', currentUser.id).single();
+  if (!profile) return;
+  const due = new Date(profile.alive_check_due);
+  if (new Date() > due) {
+    document.getElementById('alive-banner-container').innerHTML = `
       <div class="alive-banner">
         <div class="alive-banner-text">
           <strong>⚠ Alive Check Due</strong><br>
@@ -1683,19 +1694,20 @@ function checkAliveStatus() {
         </div>
         <button class="btn-alive" onclick="confirmAlive()">✓ I'm Alive</button>
       </div>`;
-    document.getElementById('alive-banner-container').innerHTML = banner;
   } else {
     document.getElementById('alive-banner-container').innerHTML = '';
-    const days = Math.ceil((due - Date.now()) / (24*60*60*1000));
+    const days = Math.ceil((due - new Date()) / (24*60*60*1000));
     document.getElementById('next-check-text').textContent = 'Next check in ' + days + ' day' + (days !== 1 ? 's' : '');
   }
 }
 
-function confirmAlive() {
-  const data = getUserData();
-  data.lastAlive = Date.now();
-  data.aliveCheckDue = Date.now() + 7*24*60*60*1000;
-  saveUserData(data);
+async function confirmAlive() {
+  const nextDue = new Date(Date.now() + 7*24*60*60*1000).toISOString();
+  await sb.from('profiles').update({
+    last_alive: new Date().toISOString(),
+    alive_check_due: nextDue
+  }).eq('id', currentUser.id);
+  await sb.from('alive_logs').insert({ user_id: currentUser.id });
   document.getElementById('alive-banner-container').innerHTML = '';
   document.getElementById('next-check-text').textContent = 'Next check in 7 days';
   showToast('✓ Alive check confirmed. Your messages remain sealed.');
@@ -1709,43 +1721,44 @@ function selectDelivery(el, type) {
   document.getElementById('schedule-date-group').style.display = type === 'scheduled' ? 'block' : 'none';
 }
 
-function saveMessage() {
+async function saveMessage() {
   const title = document.getElementById('msg-title').value.trim();
   const recipient = document.getElementById('msg-recipient').value;
   const body = document.getElementById('msg-body').value.trim();
   if (!title || !body) { showToast('Please add a title and message.'); return; }
   if (!recipient) { showToast('Please select a recipient. Add a contact first.'); return; }
-  const data = getUserData();
   const encBody = encrypt(body, currentUser.pass);
-  data.messages.push({
-    id: Date.now(),
+  const { error } = await sb.from('messages').insert({
+    user_id: currentUser.id,
     title,
-    recipient,
-    body: encBody,
-    delivery: selectedDelivery,
-    date: document.getElementById('msg-date').value || null,
-    created: new Date().toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }),
+    recipient_id: recipient,
+    body_encrypted: encBody,
+    delivery_type: selectedDelivery,
+    delivery_date: document.getElementById('msg-date').value || null,
     status: 'sealed'
   });
-  saveUserData(data);
+  if (error) { showToast('Error saving: ' + error.message); return; }
   document.getElementById('msg-title').value = '';
   document.getElementById('msg-body').value = '';
   document.getElementById('msg-recipient').value = '';
-  showToast('Message sealed and encrypted successfully. ✓');
+  showToast('Message sealed and encrypted. ✓');
   showDashPage('messages');
 }
 
-function renderMessages() {
-  const data = getUserData();
+async function renderMessages() {
+  const { data: messages } = await sb.from('messages')
+    .select('*, contacts(name, email)')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
   const list = document.getElementById('messages-list');
-  if (!data.messages.length) {
+  if (!messages || !messages.length) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">✉</div><p>No messages yet.<br>Write your first sealed letter to someone you love.</p></div>';
     return;
   }
-  list.innerHTML = data.messages.map((m, i) => {
-    const preview = decrypt(m.body, currentUser.pass).substring(0, 80) + '...';
-    const contact = data.contacts.find(c => c.email === m.recipient);
-    const cname = contact ? contact.name : m.recipient;
+  list.innerHTML = messages.map(m => {
+    const preview = decrypt(m.body_encrypted, currentUser.pass).substring(0, 80) + '...';
+    const cname = m.contacts ? m.contacts.name : 'Unknown';
+    const date = new Date(m.created_at).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
     return `
       <div class="message-card">
         <div class="message-icon">✉</div>
@@ -1755,78 +1768,76 @@ function renderMessages() {
           <div class="message-preview">${preview}</div>
         </div>
         <div class="message-meta">
-          <div class="message-date">${m.created}</div>
+          <div class="message-date">${date}</div>
           <div class="badge badge-sealed">Sealed</div>
           <br><br>
-          <button class="btn-icon" title="Delete" onclick="deleteMessage(${i})">🗑</button>
+          <button class="btn-icon" title="Delete" onclick="deleteMessage('${m.id}')">🗑</button>
         </div>
       </div>`;
   }).join('');
 }
 
-function deleteMessage(i) {
-  const data = getUserData();
-  data.messages.splice(i, 1);
-  saveUserData(data);
+async function deleteMessage(id) {
+  await sb.from('messages').delete().eq('id', id);
   renderMessages();
   updateStats();
   showToast('Message deleted.');
 }
 
-function populateRecipients() {
-  const data = getUserData();
+async function populateRecipients() {
+  const { data: contacts } = await sb.from('contacts').select('*').eq('user_id', currentUser.id);
   const sel = document.getElementById('msg-recipient');
   sel.innerHTML = '<option value="">— Select contact —</option>' +
-    data.contacts.map(c => `<option value="${c.email}">${c.name} (${c.relationship})</option>`).join('');
+    (contacts || []).map(c => `<option value="${c.id}">${c.name} (${c.relationship})</option>`).join('');
 }
 
 // ── CONTACTS ──
 function openContactModal() { document.getElementById('contact-modal').classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-function saveContact() {
+async function saveContact() {
   const name = document.getElementById('c-name').value.trim();
   const email = document.getElementById('c-email').value.trim();
   const rel = document.getElementById('c-rel').value;
   if (!name || !email) { showToast('Please fill in name and email.'); return; }
-  const data = getUserData();
-  data.contacts.push({ name, email, relationship: rel, added: new Date().toLocaleDateString() });
-  saveUserData(data);
+  const { error } = await sb.from('contacts').insert({
+    user_id: currentUser.id, name, email, relationship: rel
+  });
+  if (error) { showToast('Error: ' + error.message); return; }
   closeModal('contact-modal');
   document.getElementById('c-name').value = '';
   document.getElementById('c-email').value = '';
   renderContacts();
   updateStats();
-  showToast(name + ' added as a trusted contact.');
+  showToast(name + ' added as a trusted contact. ✓');
 }
 
-function renderContacts() {
-  const data = getUserData();
+async function renderContacts() {
+  const { data: contacts } = await sb.from('contacts').select('*').eq('user_id', currentUser.id);
+  const { data: messages } = await sb.from('messages').select('recipient_id').eq('user_id', currentUser.id);
   const list = document.getElementById('contacts-list');
-  if (!data.contacts.length) {
+  if (!contacts || !contacts.length) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">◉</div><p>No contacts yet.<br>Add the people who should receive your messages.</p></div>';
     return;
   }
-  const msgs = data.messages;
-  list.innerHTML = data.contacts.map((c, i) => {
-    const count = msgs.filter(m => m.recipient === c.email).length;
+  list.innerHTML = contacts.map(c => {
+    const count = (messages || []).filter(m => m.recipient_id === c.id).length;
+    const date = new Date(c.created_at).toLocaleDateString();
     return `
       <div class="contact-card">
         <div class="contact-avatar">${c.name[0].toUpperCase()}</div>
         <div class="contact-name">${c.name}</div>
         <div class="contact-rel">${c.relationship}</div>
         <div class="contact-email">${c.email}</div>
-        <div class="contact-msgs">${count} message${count !== 1 ? 's' : ''} sealed for this person · Added ${c.added}
-          <br><button class="btn-icon" title="Remove contact" onclick="deleteContact(${i})" style="margin-top:6px;padding:0;font-size:12px;color:var(--danger);">Remove contact</button>
+        <div class="contact-msgs">${count} message${count !== 1 ? 's' : ''} sealed · Added ${date}
+          <br><button class="btn-icon" onclick="deleteContact('${c.id}')" style="margin-top:6px;padding:0;font-size:12px;color:var(--danger);">Remove contact</button>
         </div>
       </div>`;
   }).join('');
 }
 
-function deleteContact(i) {
-  const data = getUserData();
-  data.contacts.splice(i, 1);
-  saveUserData(data);
+async function deleteContact(id) {
+  await sb.from('contacts').delete().eq('id', id);
   renderContacts();
   updateStats();
   showToast('Contact removed.');
@@ -1835,22 +1846,20 @@ function deleteContact(i) {
 // ── VAULT ──
 function openVaultModal() { document.getElementById('vault-modal').classList.add('open'); }
 
-function saveVaultItem() {
+async function saveVaultItem() {
   const label = document.getElementById('v-label').value.trim();
   const user = document.getElementById('v-user').value.trim();
   const pass = document.getElementById('v-pass').value;
   const notes = document.getElementById('v-notes').value.trim();
   if (!label) { showToast('Please add a label.'); return; }
-  const data = getUserData();
-  data.vault.push({
-    id: Date.now(),
+  const { error } = await sb.from('vault').insert({
+    user_id: currentUser.id,
     label,
-    user: encrypt(user, currentUser.pass),
-    pass: encrypt(pass, currentUser.pass),
-    notes: encrypt(notes, currentUser.pass),
-    added: new Date().toLocaleDateString()
+    username_encrypted: encrypt(user, currentUser.pass),
+    password_encrypted: encrypt(pass, currentUser.pass),
+    notes_encrypted: encrypt(notes, currentUser.pass)
   });
-  saveUserData(data);
+  if (error) { showToast('Error: ' + error.message); return; }
   closeModal('vault-modal');
   document.getElementById('v-label').value = '';
   document.getElementById('v-user').value = '';
@@ -1861,15 +1870,16 @@ function saveVaultItem() {
   showToast('Saved to vault with encryption. ✓');
 }
 
-function renderVault() {
-  const data = getUserData();
+async function renderVault() {
+  const { data: items } = await sb.from('vault').select('*').eq('user_id', currentUser.id);
   const list = document.getElementById('vault-list');
-  if (!data.vault.length) {
+  if (!items || !items.length) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">⬡</div><p>Your vault is empty.<br>Store important passwords and accounts for your loved ones.</p></div>';
     return;
   }
-  list.innerHTML = data.vault.map((v, i) => {
-    const u = decrypt(v.user, currentUser.pass);
+  list.innerHTML = items.map(v => {
+    const u = decrypt(v.username_encrypted, currentUser.pass);
+    const date = new Date(v.created_at).toLocaleDateString();
     return `
       <div class="vault-item">
         <div>
@@ -1877,33 +1887,35 @@ function renderVault() {
           <div class="vault-key">${u || '—'}</div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:11px;color:var(--muted);">🔒 Encrypted · ${v.added}</span>
-          <button class="btn-icon" onclick="deleteVaultItem(${i})">🗑</button>
+          <span style="font-size:11px;color:var(--muted);">🔒 Encrypted · ${date}</span>
+          <button class="btn-icon" onclick="deleteVaultItem('${v.id}')">🗑</button>
         </div>
       </div>`;
   }).join('');
 }
 
-function deleteVaultItem(i) {
-  const data = getUserData();
-  data.vault.splice(i, 1);
-  saveUserData(data);
+async function deleteVaultItem(id) {
+  await sb.from('vault').delete().eq('id', id);
   renderVault();
   updateStats();
   showToast('Vault item deleted.');
 }
 
 // ── EXPORT ──
-function exportData() {
-  const data = getUserData();
+async function exportData() {
+  const [{ data: messages }, { data: contacts }, { data: vault }] = await Promise.all([
+    sb.from('messages').select('*').eq('user_id', currentUser.id),
+    sb.from('contacts').select('*').eq('user_id', currentUser.id),
+    sb.from('vault').select('*').eq('user_id', currentUser.id),
+  ]);
   const decrypted = {
-    messages: data.messages.map(m => ({ ...m, body: decrypt(m.body, currentUser.pass) })),
-    contacts: data.contacts,
-    vault: data.vault.map(v => ({
+    messages: (messages||[]).map(m => ({ ...m, body: decrypt(m.body_encrypted, currentUser.pass) })),
+    contacts,
+    vault: (vault||[]).map(v => ({
       label: v.label,
-      user: decrypt(v.user, currentUser.pass),
-      pass: decrypt(v.pass, currentUser.pass),
-      notes: decrypt(v.notes, currentUser.pass)
+      user: decrypt(v.username_encrypted, currentUser.pass),
+      pass: decrypt(v.password_encrypted, currentUser.pass),
+      notes: decrypt(v.notes_encrypted, currentUser.pass)
     })),
     exportedAt: new Date().toISOString()
   };
