@@ -3402,14 +3402,19 @@
       });
 
       function enterDashboard() {
-        document.getElementById("user-display").textContent =
-          currentUser.name.split(" ")[0];
-        document.getElementById("user-avatar-text").textContent =
-          currentUser.name[0].toUpperCase();
-        document.getElementById("first-name").textContent =
-          currentUser.name.split(" ")[0];
         showScreen("dashboard");
         showDashPage("overview");
+
+        const firstName = currentUser.name.split(" ")[0];
+
+        const userDisplay = document.getElementById("user-display");
+        const userAvatarText = document.getElementById("user-avatar-text");
+        const firstNameEl = document.getElementById("first-name");
+
+        if (userDisplay) userDisplay.textContent = firstName;
+        if (userAvatarText) userAvatarText.textContent = currentUser.name[0].toUpperCase();
+        if (firstNameEl) firstNameEl.textContent = firstName;
+
         checkAliveStatus();
       }
 
