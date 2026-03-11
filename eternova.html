@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-      /* ══ THEME VARIABLES ══ */
+      
       :root {
         --ink: #1a1612;
         --parchment: #f5f0e8;
@@ -78,7 +78,7 @@
         opacity: 0.3;
       }
 
-      /* ══ SCREENS ══ */
+      
       .screen {
         display: none;
         min-height: 100vh;
@@ -88,7 +88,7 @@
         flex-direction: column;
       }
 
-      /* ══ LANDING ══ */
+      
       #landing {
         background: var(--ink);
         color: var(--parchment);
@@ -233,7 +233,7 @@
         animation: fadeUp 0.8s 0.8s forwards;
       }
 
-      /* Features section */
+      
       .features {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -311,7 +311,7 @@
         margin-top: 4px;
       }
 
-      /* ══ BUTTONS ══ */
+      
       .btn-primary {
         background: var(--gold);
         color: var(--ink);
@@ -428,7 +428,7 @@
         color: var(--danger);
       }
 
-      /* ══ PRICING ══ */
+      
       #pricing {
         background: var(--bg);
         padding: 0;
@@ -559,7 +559,7 @@
         color: var(--gold);
       }
 
-      /* ══ AUTH ══ */
+      
       #auth {
         background: var(--bg);
         align-items: center;
@@ -636,7 +636,7 @@
         line-height: 1.6;
       }
 
-      /* ══ FORM ══ */
+      
       .form-group {
         margin-bottom: 20px;
       }
@@ -679,7 +679,7 @@
         line-height: 1.7;
       }
 
-      /* ══ DASHBOARD HEADER ══ */
+      
       .dash-header {
         background: var(--header-bg);
         color: var(--header-text);
@@ -719,7 +719,7 @@
         color: var(--gold);
       }
 
-      /* header controls */
+      
       .header-controls {
         display: flex;
         align-items: center;
@@ -803,7 +803,7 @@
         color: var(--parchment);
       }
 
-      /* ══ DASHBOARD BODY ══ */
+      
       .dash-body {
         display: flex;
         flex: 1;
@@ -881,7 +881,7 @@
         margin-top: 4px;
       }
 
-      /* ══ MAIN CONTENT ══ */
+      
       .main-content {
         flex: 1;
         padding: 40px 48px;
@@ -909,7 +909,7 @@
         font-weight: 300;
       }
 
-      /* ══ STATS ══ */
+      
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -966,7 +966,7 @@
         transition: width 0.6s ease;
       }
 
-      /* ══ MESSAGES ══ */
+      
       .message-grid {
         display: grid;
         gap: 16px;
@@ -1036,7 +1036,7 @@
         color: var(--rust);
       }
 
-      /* ══ COMPOSE ══ */
+      
       .compose-form {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -1087,7 +1087,7 @@
         margin-top: 8px;
       }
 
-      /* ══ CONTACTS ══ */
+      
       .contacts-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1142,7 +1142,7 @@
         border-top: 1px solid var(--border);
       }
 
-      /* ══ VAULT ══ */
+      
       .vault-item {
         display: flex;
         align-items: center;
@@ -1162,7 +1162,7 @@
         color: var(--text-muted);
       }
 
-      /* ══ PROFILE PAGE ══ */
+      
       .profile-layout {
         display: grid;
         grid-template-columns: 280px 1fr;
@@ -1337,7 +1337,7 @@
         left: 23px;
       }
 
-      /* ══ ALIVE BANNER ══ */
+      
       .alive-banner {
         background: var(--ink);
         color: var(--parchment);
@@ -1380,7 +1380,7 @@
         background: var(--gold-light);
       }
 
-      /* ══ MODALS ══ */
+      
       .modal-overlay {
         display: none;
         position: fixed;
@@ -1423,7 +1423,7 @@
         justify-content: flex-end;
       }
 
-      /* ══ MOBILE BOTTOM NAV ══ */
+      
       .mobile-nav {
         display: none;
         position: fixed;
@@ -1466,7 +1466,7 @@
         text-transform: uppercase;
       }
 
-      /* ══ EMPTY STATE ══ */
+      
       .empty-state {
         text-align: center;
         padding: 80px 40px;
@@ -1482,7 +1482,7 @@
         line-height: 1.7;
       }
 
-      /* ══ TOAST ══ */
+      
       .toast {
         position: fixed;
         bottom: 32px;
@@ -1509,7 +1509,7 @@
         transform: translateY(0);
       }
 
-      /* ══ BACK NAV ══ */
+      
       .back-nav {
         padding: 20px 60px;
         border-bottom: 1px solid var(--border);
@@ -1533,7 +1533,7 @@
         color: var(--gold);
       }
 
-      /* ══ QUICK ACTIONS ══ */
+      
       .quick-actions {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -1546,7 +1546,7 @@
         gap: 12px;
       }
 
-      /* ══ ANIMATIONS ══ */
+      
       @keyframes fadeUp {
         from {
           opacity: 0;
@@ -1585,7 +1585,7 @@
         }
       }
 
-      /* ══ RESPONSIVE ══ */
+      
       @media (max-width: 768px) {
         .landing-nav {
           padding: 20px 24px;
@@ -1655,7 +1655,7 @@
     </style>
   </head>
   <body>
-    <!-- ══════════════════ LANDING ══════════════════ -->
+    
     <div id="landing" class="screen active">
       <nav class="landing-nav">
         <div class="logo">Etern<span>ova</span></div>
@@ -1667,7 +1667,7 @@
             Get Started
           </button>
         </div>
-        <!-- mobile menu -->
+        
         <div style="display: flex; gap: 10px; align-items: center">
           <button
             class="btn-nav"
@@ -1745,7 +1745,7 @@
       </div>
     </div>
 
-    <!-- ══════════════════ PRICING ══════════════════ -->
+    
     <div id="pricing" class="screen">
       <div class="back-nav">
         <button class="back-btn" onclick="showScreen('landing')">← Back</button>
@@ -1822,7 +1822,7 @@
       </div>
     </div>
 
-    <!-- ══════════════════ AUTH ══════════════════ -->
+    
     <div id="auth" class="screen">
       <div style="position: absolute; top: 20px; left: 30px; z-index: 10">
         <button
@@ -1922,7 +1922,7 @@
       </div>
     </div>
 
-    <!-- ══════════════════ DASHBOARD ══════════════════ -->
+    
     <div id="dashboard" class="screen">
       <header class="dash-header">
         <div class="dash-logo">🕯 Eternova</div>
@@ -1980,7 +1980,7 @@
       </header>
 
       <div class="dash-body">
-        <!-- SIDEBAR -->
+        
         <aside class="sidebar">
           <div class="sidebar-section">
             <div class="sidebar-label" data-i18n="navigate">Navigate</div>
@@ -2044,9 +2044,9 @@
           </div>
         </aside>
 
-        <!-- MAIN -->
+        
         <main class="main-content">
-          <!-- OVERVIEW -->
+          
           <div class="page active" id="page-overview">
             <div id="alive-banner-container"></div>
             <div class="page-title" data-i18n="good_to_see">
@@ -2158,7 +2158,7 @@
             </div>
           </div>
 
-          <!-- MESSAGES -->
+          
           <div class="page" id="page-messages">
             <div class="page-title" data-i18n="my_messages">My Messages</div>
             <div class="page-sub" data-i18n="all_sealed">
@@ -2177,7 +2177,7 @@
             </div>
           </div>
 
-          <!-- COMPOSE -->
+          
           <div class="page" id="page-compose">
             <div class="page-title" data-i18n="write_message">
               Write a Message
@@ -2286,7 +2286,7 @@
             </div>
           </div>
 
-          <!-- CONTACTS -->
+          
           <div class="page" id="page-contacts">
             <div class="page-title" data-i18n="trusted_contacts">
               Trusted Contacts
@@ -2305,7 +2305,7 @@
             </div>
           </div>
 
-          <!-- VAULT -->
+          
           <div class="page" id="page-vault">
             <div class="page-title" data-i18n="vault">Digital Vault</div>
             <div class="page-sub" data-i18n="vault_desc">
@@ -2322,14 +2322,14 @@
             </div>
           </div>
 
-          <!-- PROFILE -->
+          
           <div class="page" id="page-profile">
             <div class="page-title" data-i18n="profile">My Profile</div>
             <div class="page-sub" data-i18n="profile_desc">
               Manage your identity, security and preferences
             </div>
             <div class="profile-layout">
-              <!-- LEFT: profile card -->
+              
               <div>
                 <div class="profile-card">
                   <div class="profile-avatar-wrap">
@@ -2395,9 +2395,9 @@
                 </div>
               </div>
 
-              <!-- RIGHT: forms -->
+              
               <div class="profile-forms">
-                <!-- Edit profile -->
+                
                 <div class="settings-section">
                   <div class="settings-title" data-i18n="edit_profile">
                     Edit Profile
@@ -2440,7 +2440,7 @@
                   </button>
                 </div>
 
-                <!-- Change password -->
+                
                 <div class="settings-section">
                   <div class="settings-title" data-i18n="change_password">
                     Change Password
@@ -2480,7 +2480,7 @@
                   </button>
                 </div>
 
-                <!-- Notifications -->
+                
                 <div class="settings-section">
                   <div class="settings-title" data-i18n="notifications">
                     Notification Preferences
@@ -2543,7 +2543,7 @@
                   </div>
                 </div>
 
-                <!-- Security -->
+                
                 <div class="settings-section">
                   <div class="settings-title" data-i18n="security">
                     Security
@@ -2590,7 +2590,7 @@
                   </div>
                 </div>
 
-                <!-- Danger zone -->
+                
                 <div
                   class="settings-section"
                   style="border-color: rgba(139, 32, 32, 0.25)"
@@ -2641,7 +2641,7 @@
             </div>
           </div>
 
-          <!-- SETTINGS (redirect to profile) -->
+          
           <div class="page" id="page-settings">
             <div class="page-title" data-i18n="settings">Settings</div>
             <div class="page-sub">
@@ -2654,7 +2654,7 @@
         </main>
       </div>
 
-      <!-- MOBILE BOTTOM NAV -->
+      
       <nav class="mobile-nav">
         <div class="mobile-nav-inner">
           <button
@@ -2714,7 +2714,7 @@
       </nav>
     </div>
 
-    <!-- ══════════════════ MODALS ══════════════════ -->
+    
     <div class="modal-overlay" id="contact-modal">
       <div class="modal">
         <div class="modal-title" data-i18n="add_trusted_contact">
@@ -2850,22 +2850,24 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- ══════════════════ JAVASCRIPT ══════════════════ -->
+    
     <script>
-      // ── SUPABASE ──
+      
+      const SUPABASE_URL = "REPLACE_WITH_YOUR_SUPABASE_URL";
+      const SUPABASE_ANON_KEY = "REPLACE_WITH_YOUR_ANON_KEY";
       const { createClient } = supabase;
       const sb = createClient(
-        "https://csebfnjufnkaohyqdphs.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzZWJmbmp1Zm5rYW9oeXFkcGhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxODIyNTQsImV4cCI6MjA4ODc1ODI1NH0.6uD_OCX9wWjfCPcXczcqETqsht_GkGppmxvXmyyj9BU",
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
       );
 
-      // ── STATE ──
+      
       let currentUser = null;
       let selectedDelivery = "upon-passing";
       let currentLang = localStorage.getItem("etv_lang") || "en";
       let currentTheme = localStorage.getItem("etv_theme") || "light";
 
-      // ── I18N ──
+      
       const i18n = {
         en: {
           signin: "Sign In",
@@ -3226,7 +3228,7 @@
         );
       }
 
-      // ── THEME ──
+      
       function applyTheme() {
         document.documentElement.setAttribute("data-theme", currentTheme);
         document.getElementById("theme-btn").textContent =
@@ -3238,7 +3240,7 @@
         applyTheme();
       }
 
-      // ── ENCRYPTION ──
+      
       function encrypt(text, key) {
         return CryptoJS.AES.encrypt(text, key).toString();
       }
@@ -3251,7 +3253,7 @@
         }
       }
 
-      // ── NAVIGATION ──
+      
       function showScreen(id) {
         document
           .querySelectorAll(".screen")
@@ -3259,7 +3261,7 @@
         document.getElementById(id).classList.add("active");
       }
 
-      // ── AUTH ──
+      
       function switchTab(tab) {
         document
           .querySelectorAll(".auth-tab")
@@ -3418,7 +3420,7 @@
         checkAliveStatus();
       }
 
-      // ── DASHBOARD ──
+      
       function showDashPage(page) {
         document
           .querySelectorAll(".page")
@@ -3487,7 +3489,7 @@
         }
       }
 
-      // ── ALIVE CHECK ──
+      
       async function checkAliveStatus() {
         if (!currentUser) return;
         const { data: profile } = await sb
@@ -3529,7 +3531,7 @@
         showToast("✓ Alive check confirmed. Your messages remain sealed.");
       }
 
-      // ── MESSAGES ──
+      
       function selectDelivery(el, type) {
         document
           .querySelectorAll(".delivery-opt")
@@ -3622,7 +3624,7 @@
             .join("");
       }
 
-      // ── CONTACTS ──
+      
       function openContactModal() {
         document.getElementById("contact-modal").classList.add("open");
       }
@@ -3685,7 +3687,7 @@
         showToast("Contact removed.");
       }
 
-      // ── VAULT ──
+      
       function openVaultModal() {
         document.getElementById("vault-modal").classList.add("open");
       }
@@ -3753,7 +3755,7 @@
         showToast("Vault item deleted.");
       }
 
-      // ── PROFILE ──
+      
       async function loadProfile() {
         if (!currentUser) return;
         const { data: profile } = await sb
@@ -3778,7 +3780,7 @@
           document.getElementById("ps-days").textContent = days;
         }
         await updateStats();
-        // load avatar if stored
+        
         const avatarKey = "etv_avatar_" + currentUser.id;
         const storedAvatar = localStorage.getItem(avatarKey);
         if (storedAvatar) setAvatarImage(storedAvatar);
@@ -3887,7 +3889,7 @@
         showToast("Account deleted permanently.");
       }
 
-      // ── EXPORT ──
+      
       async function exportData() {
         const [{ data: messages }, { data: contacts }, { data: vault }] =
           await Promise.all([
@@ -3920,7 +3922,7 @@
         showToast("Data exported successfully.");
       }
 
-      // ── TOAST ──
+      
       function showToast(msg) {
         const t = document.getElementById("toast");
         t.textContent = msg;
@@ -3931,7 +3933,7 @@
         t._persistTimeout = setTimeout(() => t.classList.remove("show"), 3500);
       }
 
-      // Stays visible until user clicks it (for errors)
+      
       function showToastPersist(msg) {
         const t = document.getElementById("toast");
         if (t._persistTimeout) clearTimeout(t._persistTimeout);
@@ -3941,7 +3943,7 @@
         t.classList.add("show");
       }
 
-      // ── CLOSE MODALS ──
+      
       document.querySelectorAll(".modal-overlay").forEach((o) => {
         o.addEventListener("click", (e) => {
           if (e.target === o) o.classList.remove("open");
